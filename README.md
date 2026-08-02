@@ -1,38 +1,59 @@
 # ForgeFlow AI Media
 
-A production-ready monorepo containing a React/Next.js interface and a FastAPI backend, designed for generating and managing AI media assets.
+ForgeFlow is an early-stage prototype for orchestrating generative-media workflows with Genblaze and storing generated assets and provenance records in Backblaze B2.
 
-## Project Structure
-- `/apps/web` - Next.js frontend
-- `/apps/api` - FastAPI backend
-- `/packages/shared` - Shared schemas and types
+**Status:** frontend demo available; backend integration under development.
 
-## Deployed API
-- Base URL: `https://forgeflow-ai-media.swoony-map-9040.chatgpt.site/`
-- Interactive API Docs (Swagger UI): `https://forgeflow-ai-media.swoony-map-9040.chatgpt.site/docs`
-- OpenAPI schema: `https://forgeflow-ai-media.swoony-map-9040.chatgpt.site/openapi.json`
+## Deployment Status
 
-## Quick Start
-1. Copy the environment template:
+- **Frontend demo:** https://forgeflow-ai-media.swoony-map-9040.chatgpt.site/
+- **Backend API:** Not deployed
+
+> Note: Do not advertise `/docs` or `/openapi.json` until a real FastAPI backend deployment is verified.
+
+## Current Repository Structure
+
+```text
+app/
+├── main.py
+├── config.py
+├── routes/
+└── services/
+Dockerfile
+docker-compose.yml
+.env.example
+```
+
+## Quick Start (Local)
+
+### Option A: Run with Python
+
+1. Create and activate a virtual environment.
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Copy env template and set real values:
    ```bash
    cp .env.example .env
    ```
-
-2. Run the API service (from the API app directory):
+4. Start API:
    ```bash
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
-3. Verify locally:
-   - API: `http://localhost:8000`
-   - Docs: `http://localhost:8000/docs`
+### Option B: Run with Docker Compose
 
-## Environment Variables
-Configure these values in `.env`:
-- `B2_KEY_ID`
-- `B2_APP_KEY`
-- `B2_BUCKET`
-- `B2_REGION`
-- `GMI_API_KEY`
+```bash
+docker compose up --build
+```
 
-> Security note: Never commit real API keys or secrets to the repository. Use environment variables and rotate any exposed credentials.
+## Limitations (Current Prototype)
+
+- Some media generation/storage flows may still be scaffolded or mocked.
+- Provider integration hardening and production deployment are in progress.
+
+## Security
+
+- Never commit credentials in source, commits, pull requests, issues, or chat.
+- Use only runtime secret configuration (deployment environment / secret manager).
