@@ -1,35 +1,42 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-import uuid
+from pydantic import BaseModel, Field
+
 from app.services.pipeline import pipeline_service
-from app.services.storage import storage_service
 
 router = APIRouter()
 
+
 class GenerationRequest(BaseModel):
     prompt: str
-    parameters: dict = {}
+    parameters: dict = Field(default_factory=dict)
+
 
 class GenerationResponse(BaseModel):
-    id: str
-    url: str
+    run_id: str
+    asset_url: str
+    sha256: str
+    manifest_uri: str
     prompt: str
 
+
 @router.post("/", response_model=GenerationResponse)
-async def create_generation(req: GenerationRequest):
+async def create_generation(req: GenerationRequest) -> GenerationResponse:
+    """
+    Submit an image-generation job to the Genblaze GMI Cloud pipeline.
+
+    The pipeline stores the generated asset in Backblaze B2 and returns
+    real Genblaze run metadata: run_id, asset_url, sha256, manifest_uri.
+    """
     try:
-        # 1. Run the Genblaze Pipeline
-        media_bytes = pipeline_service.generate_media(req.prompt, req.parameters)
-        
-        # 2. Store the result in Backblaze B2
-        filename = f"generations/{uuid.uuid4()}.png"
-        asset_url = storage_service.upload_file(media_bytes, filename, "image/png")
-        
-        # 3. Return the contract to the frontend
-        return GenerationResponse(
-            id=str(uuid.uuid4()),
-            url=asset_url,
-            prompt=req.prompt
+        result = await pipeline_service.generate_media_async(
+            req.prompt, req.parameters
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return GenerationResponse(
+            run_id=result.run_id,
+            asset_url=result.asset_url,
+            sha256=result.sha256,
+            manifest_uri=result.manifest_uri,
+            prompt=req.prompt,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
