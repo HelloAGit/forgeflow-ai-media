@@ -90,4 +90,5 @@ def test_cors_origins_custom(monkeypatch):
 
     cfg_mod.get_settings.cache_clear()
     settings = cfg_mod.get_settings()
-    assert "app.example.com" in settings.CORS_ORIGINS
+    parsed = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+    assert parsed == ["https://app.example.com", "https://staging.example.com"]
