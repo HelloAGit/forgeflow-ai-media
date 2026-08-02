@@ -1,14 +1,15 @@
+import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Backblaze B2 Configuration (S3-compatible API)
-    B2_KEY_ID: 6fda75616ee7
-    B2_APP_KEY: 003cdfd1779d82da2d7b4dfcf42106cb2c16dc405a
-    B2_BUCKET: a6ef4dfa17c5b6e196fe0e17
-    B2_REGION: Europe
+    B2_KEY_ID: str = os.getenv("B2_KEY_ID", "")
+    B2_APP_KEY: str = os.getenv("B2_APP_KEY", "")
+    B2_BUCKET: str = os.getenv("B2_BUCKET", "")
+    B2_REGION: str = os.getenv("B2_REGION", "Europe")
     
-    # Genblaze / Model API Configuration
-    GMI_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNlYzljNmExLTg1MzUtNGUwNC04ODRiLTdhMjU3ZmE3YzliYiIsInNjb3BlIjoiaWVfbW9kZWwiLCJwcm9kdWN0IjoiSUUiLCJvd25lcklkIjoiOGQ1NGJmNTItNzAyYy00YmU5LTk2YTQtMThjNDVhYjE4ZWM1In0.KSB51cSPKp7EzIR8hGV7s2pHBSTwhokzyy9rexOc9cQ
+    # GMI API Configuration
+    GMI_API_KEY: str = os.getenv("GMI_API_KEY", "")
 
     class Config:
         env_file = ".env"
