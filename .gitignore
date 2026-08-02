@@ -1,21 +1,19 @@
-# Environments
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Environment / secrets
 .env
 .env.*
 !.env.example
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-env/
-
-# Node
-node_modules/
-dist/
-.next/
-
-# OS
+# OS / IDE
 .DS_Store
-Thumbs.db
+.vscode/
+.idea/
