@@ -1,38 +1,71 @@
-import os
-from dataclasses import dataclass
+from functools import lru_cache
+from typing import Optional
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-def _required(name: str) -> str:
-    value = os.getenv(name)
-    if value is None or value.strip() == "":
-        raise RuntimeError(f"Missing required environment variable: {name}")
-    return value.strip()
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables.
 
+    All credentials are optional at import time so that the application
+    can start and serve /health without storage/generation credentials
+    being present.  Services that require credentials validate them at
+    call time via :func:`require_generation_settings` /
+    :func:`require_storage_settings`.
+    """
 
-@dataclass(frozen=True)
-class Settings:
     # Genblaze / GMI
-    gmi_api_key: str
-    gmi_base_url: str
+    GMI_API_KEY: Optional[str] = None
+    GMI_BASE_URL: str = "https://api.genblaze.ai"
 
-    # Backblaze B2 S3-compatible settings
-    b2_endpoint: str
-    b2_region: str
-    b2_bucket: str  # bucket NAME, not bucket ID
-    b2_access_key_id: str
-    b2_secret_access_key: str
+    # Backblaze B2 (S3-compatible)
+    B2_ENDPOINT: Optional[str] = None
+    B2_REGION: Optional[str] = None
+    # B2_BUCKET must be the bucket NAME, not the bucket ID
+    B2_BUCKET: Optional[str] = None
+    B2_ACCESS_KEY_ID: Optional[str] = None
+    B2_SECRET_ACCESS_KEY: Optional[str] = None
 
-    @staticmethod
-    def from_env() -> "Settings":
-        return Settings(
-            gmi_api_key=_required("GMI_API_KEY"),
-            gmi_base_url=os.getenv("GMI_BASE_URL", "https://api.genblaze.ai").strip(),
-            b2_endpoint=_required("B2_ENDPOINT"),
-            b2_region=_required("B2_REGION"),
-            b2_bucket=_required("B2_BUCKET"),
-            b2_access_key_id=_required("B2_ACCESS_KEY_ID"),
-            b2_secret_access_key=_required("B2_SECRET_ACCESS_KEY"),
-        )
+    # CORS — comma-separated list of allowed origins
+    CORS_ORIGINS: str = "http://localhost:3000"
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore",
+    )
+
+    def require_generation_settings(self) -> None:
+        """Raise RuntimeError if generation credentials are missing."""
+        missing = [
+            name
+            for name in ("GMI_API_KEY",)
+            if not getattr(self, name)
+        ]
+        if missing:
+            raise RuntimeError(
+                f"Missing required environment variable(s): {', '.join(missing)}"
+            )
+
+    def require_storage_settings(self) -> None:
+        """Raise RuntimeError if storage credentials are missing."""
+        missing = [
+            name
+            for name in (
+                "B2_ENDPOINT",
+                "B2_REGION",
+                "B2_BUCKET",
+                "B2_ACCESS_KEY_ID",
+                "B2_SECRET_ACCESS_KEY",
+            )
+            if not getattr(self, name)
+        ]
+        if missing:
+            raise RuntimeError(
+                f"Missing required environment variable(s): {', '.join(missing)}"
+            )
 
 
-settings = Settings.from_env()
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
