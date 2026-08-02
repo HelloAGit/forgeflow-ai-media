@@ -1,21 +1,38 @@
-from dotenv import load_dotenv
 import os
-from pydantic_settings import BaseSettings
+from dataclasses import dataclass
 
-load_dotenv()
 
-class Settings(BaseSettings):
-    # Backblaze B2 Configuration (S3-compatible API)
-    B2_KEY_ID: str = os.getenv("B2_KEY_ID", "6fda75616ee7")
-    B2_APP_KEY: str = os.getenv("B2_APP_KEY", "003eda6b144b99023ef48da4564e329d2111aeb8c3")
-    B2_BUCKET: str = os.getenv("B2_BUCKET", "666f7d6a4795c63196fe0e17")
-    B2_REGION: str = os.getenv("B2_REGION", "Europe")
-    
-    # GMI API Configuration
-    GMI_API_KEY: str = os.getenv("GMI_API_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk5MWQyNWIwLWU0MDAtNGM0Zi05ODczLWI2YTYxYWQzMmU1MyIsInNjb3BlIjoiaWVfbW9kZWwiLCJwcm9kdWN0IjoiSUUiLCJvd25lcklkIjoiOGQ1NGJmNTItNzAyYy00YmU5LTk2YTQtMThjNDVhYjE4ZWM1In0.ZnHenb7Z6P4qTvLSYCkVRyFg6q7rf7myeFAbbLYcACo")
+def _required(name: str) -> str:
+    value = os.getenv(name)
+    if value is None or value.strip() == "":
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value.strip()
 
-    class Config:
-        env_file = ".env"
-        extra = "ignore"
 
-settings = Settings()
+@dataclass(frozen=True)
+class Settings:
+    # Genblaze / GMI
+    gmi_api_key: str
+    gmi_base_url: str
+
+    # Backblaze B2 S3-compatible settings
+    b2_endpoint: str
+    b2_region: str
+    b2_bucket: str  # bucket NAME, not bucket ID
+    b2_access_key_id: str
+    b2_secret_access_key: str
+
+    @staticmethod
+    def from_env() -> "Settings":
+        return Settings(
+            gmi_api_key=_required("GMI_API_KEY"),
+            gmi_base_url=os.getenv("GMI_BASE_URL", "https://api.genblaze.ai").strip(),
+            b2_endpoint=_required("B2_ENDPOINT"),
+            b2_region=_required("B2_REGION"),
+            b2_bucket=_required("B2_BUCKET"),
+            b2_access_key_id=_required("B2_ACCESS_KEY_ID"),
+            b2_secret_access_key=_required("B2_SECRET_ACCESS_KEY"),
+        )
+
+
+settings = Settings.from_env()
