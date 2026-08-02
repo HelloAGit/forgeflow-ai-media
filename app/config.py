@@ -2,13 +2,13 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Backblaze B2 Configuration (S3-compatible API)
-    B2_KEY_ID: str
-    B2_APP_KEY: str
-    B2_BUCKET: str
-    B2_REGION: str
+    B2_KEY_ID: 6fda75616ee7
+    B2_APP_KEY: 003cdfd1779d82da2d7b4dfcf42106cb2c16dc405a
+    B2_BUCKET: a6ef4dfa17c5b6e196fe0e17
+    B2_REGION: Europe
     
     # Genblaze / Model API Configuration
-    GMI_API_KEY: str
+    GMI_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNlYzljNmExLTg1MzUtNGUwNC04ODRiLTdhMjU3ZmE3YzliYiIsInNjb3BlIjoiaWVfbW9kZWwiLCJwcm9kdWN0IjoiSUUiLCJvd25lcklkIjoiOGQ1NGJmNTItNzAyYy00YmU5LTk2YTQtMThjNDVhYjE4ZWM1In0.KSB51cSPKp7EzIR8hGV7s2pHBSTwhokzyy9rexOc9cQ
 
     class Config:
         env_file = ".env"
